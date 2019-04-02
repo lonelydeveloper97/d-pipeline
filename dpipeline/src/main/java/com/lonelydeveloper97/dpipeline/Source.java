@@ -31,10 +31,7 @@ public interface Source<T> extends FilterableSource<T>, MappableSource<T>, Colle
         return new ErrorHandlingSourceDecorator<>(this);
     }
 
-    default <E extends Throwable> ErrorHandlingSource<T> addErrorHandling(Class<E> eClass, Pipe<E> errorHandlingPile){
-        ErrorHandlingSourceDecorator<T> tSourceErrorsDecorator = new ErrorHandlingSourceDecorator<>(this);
-        tSourceErrorsDecorator.addErrorHandling(eClass, errorHandlingPile);
-        return tSourceErrorsDecorator;
+    default <E extends Throwable> ErrorHandlingSource<T> addErrorHandling(Class<E> eClass, Sink<E> errorSink){
+        return addErrorHandling().addErrorHandling(eClass, errorSink);
     }
-
 }
