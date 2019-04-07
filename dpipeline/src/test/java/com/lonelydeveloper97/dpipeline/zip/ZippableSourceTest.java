@@ -1,11 +1,9 @@
 package com.lonelydeveloper97.dpipeline.zip;
 
-import android.support.v4.util.Pair;
-
 import com.lonelydeveloper97.dpipeline.Source;
 import com.lonelydeveloper97.dpipeline.collections.CollectionSource;
 import com.lonelydeveloper97.dpipeline.collections.ListCollector;
-import com.lonelydeveloper97.dpipeline.pipe.Pipe;
+import com.lonelydeveloper97.dpipeline.pipe.stream.StreamPipe;
 
 import org.junit.Test;
 
@@ -13,7 +11,9 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class ZippableSourceTest {
 
@@ -21,32 +21,32 @@ public class ZippableSourceTest {
     public void zip() {
         AtomicInteger called = new AtomicInteger(0);
 
-        Pipe<String> pipeForStrings = Pipe.create();
+        StreamPipe<String> streamPipeForStrings = StreamPipe.create();
 
-        pipeForStrings.zip(CollectionSource.fromIterable(Arrays.asList(1, 2, 3, 4)),
-                ZipStrategy.createDefault(),
+        streamPipeForStrings.zip(CollectionSource.fromIterable(Arrays.asList(1, 2, 3, 4)),
+                ZippingSource.createDefault(),
                 (stringOptional, integerOptional) -> stringOptional.orElse("").concat(integerOptional.map(Object::toString).orElse("")))
                 .subscribe(createCheckPipe("A", "A1"))
                 .subscribe(createCheckPipe("B", "B2"))
                 .subscribe(createCheckPipe("C", "C3"))
                 .subscribe(a -> called.incrementAndGet());
 
-        pipeForStrings.accept("A");
-        pipeForStrings.accept("B");
-        pipeForStrings.accept("C");
+        streamPipeForStrings.accept("A");
+        streamPipeForStrings.accept("B");
+        streamPipeForStrings.accept("C");
 
         assertEquals(3, called.get());
 
-        pipeForStrings.accept("D");
-        pipeForStrings.accept("E");
+        streamPipeForStrings.accept("D");
+        streamPipeForStrings.accept("E");
 
         assertEquals(4, called.get());
     }
 
-    private Pipe<String> createCheckPipe(String filter, String value) {
-        Pipe<String> stringPipe = Pipe.create();
-        stringPipe.filter(s -> s.startsWith(filter)).subscribe(a -> assertEquals(value, a));
-        return stringPipe;
+    private StreamPipe<String> createCheckPipe(String filter, String value) {
+        StreamPipe<String> stringStreamPipe = StreamPipe.create();
+        stringStreamPipe.filter(s -> s.startsWith(filter)).subscribe(a -> assertEquals(value, a));
+        return stringStreamPipe;
     }
 
     @Test
@@ -56,7 +56,7 @@ public class ZippableSourceTest {
         Source<String> stringSource = CollectionSource.fromIterable(Arrays.asList("A", "B", "C", "D"));
         stringSource
                 .zipEmptyAllowed(CollectionSource.fromIterable(Arrays.asList(1, 2)))
-                .map(ListCollector.create(), p -> p.getFirst().get().equals("D"))
+                .collect(ListCollector.create(), 4)
                 .subscribe(l -> assertEquals("A", l.get(0).getFirst().get()))
                 .subscribe(l -> assertEquals(1, (int) l.get(0).getSecond().get()))
                 .subscribe(l -> assertEquals("D", l.get(3).getFirst().get()))
@@ -74,19 +74,19 @@ public class ZippableSourceTest {
     public void zipDefaultForPipe() {
         AtomicBoolean called = new AtomicBoolean(false);
 
-        Pipe<String> pipeForStrings = Pipe.create();
+        StreamPipe<String> streamPipeForStrings = StreamPipe.create();
 
-        pipeForStrings.zip(CollectionSource.fromIterable(Arrays.asList(1, 2, 3)))
-                .map(ListCollector.create(), p -> p.getFirst().orElse("").equals("C"))
+        streamPipeForStrings.zip(CollectionSource.fromIterable(Arrays.asList(1, 2, 3)))
+                .collect(ListCollector.create(), p -> p.getFirst().orElse("").equals("C"))
                 .subscribe(l -> assertEquals("A", l.get(0).getFirst().get()))
                 .subscribe(l -> assertEquals(1, (int) l.get(0).getSecond().get()))
                 .subscribe(l -> assertEquals("C", l.get(2).getFirst().get()))
                 .subscribe(l -> assertEquals(3, l.size()))
                 .subscribe(l -> called.set(true));
 
-        pipeForStrings.accept("A");
-        pipeForStrings.accept("B");
-        pipeForStrings.accept("C");
+        streamPipeForStrings.accept("A");
+        streamPipeForStrings.accept("B");
+        streamPipeForStrings.accept("C");
 
         assertTrue(called.get());
     }

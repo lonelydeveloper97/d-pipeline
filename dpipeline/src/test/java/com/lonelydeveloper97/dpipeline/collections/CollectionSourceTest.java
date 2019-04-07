@@ -5,6 +5,8 @@ import com.lonelydeveloper97.dpipeline.util.function.Optional;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.Assert.assertEquals;
@@ -27,13 +29,53 @@ public class CollectionSourceTest {
 
 
     @Test
-    public void testMap() {
+    public void testCollectPredicate() {
         CollectionSource
                 .fromIterable(Arrays.asList("1", "2", "3", null))
                 .ofOptional()
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .map(ListCollector.create(), t -> t.equals("3"))
+                .collect(ListCollector.create(), t -> t.equals("3"))
                 .subscribe(t -> assertEquals(3, t.size()));
+    }
+
+    @Test
+    public void collect() {
+        CollectionSource
+                .fromIterable(Arrays.asList("1", "2", "3", null))
+                .ofOptional()
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(ListCollector.create(), 2)
+                .subscribe(t -> assertEquals(2, t.size()));
+
+    }
+
+    @Test
+    public void collectAll() {
+        List<String> result = CollectionSource
+                .fromIterable(Arrays.asList("1", "2", "3", "4", null))
+                .ofOptional()
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collectAll(ListCollector.create());
+
+        assertEquals(4, result.size());
+
+    }
+
+    @Test
+    public void split() {
+        AtomicInteger called = new AtomicInteger();
+        CollectionSource
+                .fromIterable(Arrays.asList("1", "2", "3", "4", null))
+                .ofOptional()
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(ListCollector.create(), 2)
+                .subscribe(t -> assertEquals(2, t.size()))
+                .subscribe(l -> called.incrementAndGet());
+
+        assertEquals(2, called.get());
     }
 }

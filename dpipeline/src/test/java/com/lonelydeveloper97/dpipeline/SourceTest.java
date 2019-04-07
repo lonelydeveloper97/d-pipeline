@@ -1,31 +1,37 @@
 package com.lonelydeveloper97.dpipeline;
 
 import com.lonelydeveloper97.dpipeline.collections.CollectionSource;
-import com.lonelydeveloper97.dpipeline.pipe.Pipe;
+import com.lonelydeveloper97.dpipeline.errors.NoErrorHandlerException;
+import com.lonelydeveloper97.dpipeline.pipe.immutability.SameInstanceException;
+import com.lonelydeveloper97.dpipeline.pipe.stream.StreamPipe;
 import com.lonelydeveloper97.dpipeline.util.function.Optional;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class SourceTest {
 
     @Test
     public void testImmute() {
-        Pipe<MyMutableClass> pipe = Pipe.create();
+        StreamPipe<MyMutableClass> streamPipe = StreamPipe.create();
 
         MyMutableClass mm = new MyMutableClass(10);
 
         //Assert instances are the same for mutable
-        pipe.subscribe(a -> assertEquals(a, mm));
+        streamPipe.subscribe(a -> assertEquals(a, mm));
 
         //Assert that instance was mutated
-        pipe.subscribe(a -> a.anInt = 1)
+        streamPipe.subscribe(a -> a.anInt = 1)
                 .subscribe(a -> assertEquals(1, a.anInt));
 
 
         //Assert that instances are different but has the same value
-        Source<MyMutableClass> imutableSource = pipe.immute(a -> new MyMutableClass(a.anInt))
+        Source<MyMutableClass> imutableSource = streamPipe.immute(a -> new MyMutableClass(a.anInt))
                 .subscribe(i -> assertNotEquals(mm, i))
                 .subscribe(i -> assertEquals(1, i.anInt));
 
@@ -54,13 +60,13 @@ public class SourceTest {
                 .subscribe(a -> assertEquals(1, a.anInt));
 
 
-        pipe.accept(mm);
+        streamPipe.accept(mm);
 
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test(expected = SameInstanceException.class)
     public void testImmuteException() {
-        Pipe<Object> source = Pipe.create();
+        StreamPipe<Object> source = StreamPipe.create();
         source.immute(a -> a).subscribe(System.out::println);
         source.accept(1);
     }
@@ -68,13 +74,12 @@ public class SourceTest {
     @Test
     public void testImmuteExceptionHandling() {
         CollectionSource.fromSingle(1)
-                .addErrorHandling(IllegalStateException.class,
-                        Pipe.<IllegalStateException>create().subscribe(a -> assertEquals(IllegalStateException.class, a.getClass()))
+                .addErrorHandling(IllegalStateException.class, a -> assertEquals(SameInstanceException.class, a.getClass())
                 )
+                .allowHandlingSuper(true)
                 .immute(a -> a)
-                .subscribe(o-> fail());
+                .subscribe(o -> fail());
     }
-
 
     @Test
     public void testOfOptional() {
@@ -89,23 +94,28 @@ public class SourceTest {
     }
 
 
-    @Test(expected = IllegalAccessError.class)
+    @Test(expected = NoErrorHandlerException.class)
     public void testErrorHandlingWrapper() {
         CollectionSource.fromSingle("A")
+
+                //Checking sink exception in another pipe
                 .addErrorHandling(
                         IllegalStateException.class,
-                        Pipe.<IllegalStateException>create()
+                        StreamPipe.<IllegalStateException>create()
                                 .subscribe(e -> assertEquals(IllegalStateException.class, e.getClass()))
                 )
-                .addErrorHandling(IllegalArgumentException.class,
-                        Pipe.<IllegalArgumentException>create()
-                                .subscribe(e -> assertEquals(IllegalArgumentException.class, e.getClass())))
+
+                //Handle exception directly
+                .addErrorHandling(IllegalArgumentException.class, e -> assertEquals(IllegalArgumentException.class, e.getClass()))
+
                 .subscribe(o -> {
                     throw new IllegalStateException();
                 })
                 .subscribe(o -> {
                     throw new IllegalArgumentException();
                 })
+
+                //Should be thrown cause no handler added
                 .subscribe(o -> {
                     throw new IllegalAccessError();
                 });

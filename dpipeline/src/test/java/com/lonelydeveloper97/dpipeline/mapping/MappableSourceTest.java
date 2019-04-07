@@ -1,20 +1,15 @@
 package com.lonelydeveloper97.dpipeline.mapping;
 
-import android.os.Handler;
-
-import com.lonelydeveloper97.dpipeline.Source;
 import com.lonelydeveloper97.dpipeline.collections.CollectionSource;
-import com.lonelydeveloper97.dpipeline.collections.Collector;
 import com.lonelydeveloper97.dpipeline.collections.ListCollector;
-import com.lonelydeveloper97.dpipeline.pipe.Pipe;
-import com.lonelydeveloper97.dpipeline.util.function.Function;
+import com.lonelydeveloper97.dpipeline.pipe.stream.StreamPipe;
 
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class MappableSourceTest {
 
@@ -24,7 +19,7 @@ public class MappableSourceTest {
 
         CollectionSource.fromIterable(Arrays.asList("1","2","3"))
                 .map(Integer::parseInt)
-                .map(ListCollector.create(), integer -> integer.equals(3))
+                .collect(ListCollector.create(), integer -> integer.equals(3))
                 .subscribe(l -> assertEquals(3, l.size()))
                 .subscribe(l -> assertEquals(3, (int) l.get(2)))
                 .subscribe(l -> called.incrementAndGet());
@@ -39,7 +34,7 @@ public class MappableSourceTest {
 
         CollectionSource.fromIterable(Arrays.asList("1","2","3"))
                 .mapAsync(s -> {
-                    Pipe<Integer> i = Pipe.create();
+                    StreamPipe<Integer> i = StreamPipe.create();
                     new Thread(() -> {
                         try {
                             Thread.sleep(100);
@@ -51,7 +46,7 @@ public class MappableSourceTest {
                     return i;
                 })
                 .subscribe(i->calledInt.incrementAndGet())
-                .map(ListCollector.create(), integer -> integer.equals(3))
+                .collect(ListCollector.create(), integer -> integer.equals(3))
                 .subscribe(l -> assertEquals(3, l.size()))
                 .subscribe(l -> assertEquals(3, (int) l.get(2)))
                 .subscribe(l -> calledArr.incrementAndGet());

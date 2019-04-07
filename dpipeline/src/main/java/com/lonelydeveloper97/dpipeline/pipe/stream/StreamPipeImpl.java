@@ -1,16 +1,16 @@
-package com.lonelydeveloper97.dpipeline.pipe;
+package com.lonelydeveloper97.dpipeline.pipe.stream;
 
 import com.lonelydeveloper97.dpipeline.Sink;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PipeImpl<T> implements Pipe<T> {
+public class StreamPipeImpl<T> implements StreamPipe<T> {
     private final List<Sink<T>> sinks = new ArrayList<>();
     private List<T> values = new ArrayList<>();
     
     @Override
-    public Pipe<T> subscribe(Sink<T> sink) {
+    public StreamPipe<T> subscribe(Sink<T> sink) {
         sinks.add(sink);
         for (T val: values){
             sink.accept(val);
@@ -27,6 +27,11 @@ public class PipeImpl<T> implements Pipe<T> {
     public void clear() {
         sinks.clear();
         values.clear();
+    }
+
+    @Override
+    public int size() {
+        return values.size();
     }
 
     @Override

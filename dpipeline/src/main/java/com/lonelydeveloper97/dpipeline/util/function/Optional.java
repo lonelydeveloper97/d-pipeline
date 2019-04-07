@@ -186,11 +186,11 @@ public final class Optional<T> {
      *     Optional<FileInputStream> fis =
      *         names.stream().filter(name -> !isProcessedYet(name))
      *                       .findFirst()
-     *                       .map(name -> new FileInputStream(name));
+     *                       .collect(name -> new FileInputStream(name));
      * }</pre>
      *
      * Here, {@code findFirst} returns an {@code Optional<String>}, and then
-     * {@code map} returns an {@code Optional<FileInputStream>} for the desired
+     * {@code collect} returns an {@code Optional<FileInputStream>} for the desired
      * file if one exists.
      *
      * @param <U> The type of the result of the mapping function
