@@ -23,6 +23,7 @@ public interface Collector<T, R> extends Sink<T> {
             @Override
             public void reset() {
                 s = "";
+                size = 0;
             }
 
             @Override
@@ -36,6 +37,10 @@ public interface Collector<T, R> extends Sink<T> {
                 size += 1;
             }
         };
+    }
+
+    static <A> Collector<A, String> stringCollector() {
+        return stringCollector(Object::toString);
     }
 
     static <A> ListCollector<A> listCollector() {
