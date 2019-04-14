@@ -1,7 +1,7 @@
 package com.lonelydeveloper97.dpipeline.mapping;
 
 import com.lonelydeveloper97.dpipeline.collections.CollectionSource;
-import com.lonelydeveloper97.dpipeline.collections.ListCollector;
+import com.lonelydeveloper97.dpipeline.collections.Collector;
 import com.lonelydeveloper97.dpipeline.pipe.stream.StreamPipe;
 
 import org.junit.Test;
@@ -19,7 +19,7 @@ public class MappableSourceTest {
 
         CollectionSource.fromIterable(Arrays.asList("1","2","3"))
                 .map(Integer::parseInt)
-                .collect(ListCollector.create(), integer -> integer.equals(3))
+                .collect(Collector.listCollector(), integer -> integer.equals(3))
                 .subscribe(l -> assertEquals(3, l.size()))
                 .subscribe(l -> assertEquals(3, (int) l.get(2)))
                 .subscribe(l -> called.incrementAndGet());
@@ -46,7 +46,7 @@ public class MappableSourceTest {
                     return i;
                 })
                 .subscribe(i->calledInt.incrementAndGet())
-                .collect(ListCollector.create(), integer -> integer.equals(3))
+                .collect(Collector.listCollector(), integer -> integer.equals(3))
                 .subscribe(l -> assertEquals(3, l.size()))
                 .subscribe(l -> assertEquals(3, (int) l.get(2)))
                 .subscribe(l -> calledArr.incrementAndGet());

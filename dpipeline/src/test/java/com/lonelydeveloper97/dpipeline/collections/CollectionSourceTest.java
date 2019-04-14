@@ -35,7 +35,7 @@ public class CollectionSourceTest {
                 .ofOptional()
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(ListCollector.create(), t -> t.equals("3"))
+                .collect(Collector.listCollector(), t -> t.equals("3"))
                 .subscribe(t -> assertEquals(3, t.size()));
     }
 
@@ -46,7 +46,7 @@ public class CollectionSourceTest {
                 .ofOptional()
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(ListCollector.create(), 2)
+                .collect(Collector.listCollector(), 2)
                 .subscribe(t -> assertEquals(2, t.size()));
 
     }
@@ -58,7 +58,7 @@ public class CollectionSourceTest {
                 .ofOptional()
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collectAll(ListCollector.create());
+                .collectAll(Collector.listCollector());
 
         assertEquals(4, result.size());
 
@@ -72,7 +72,7 @@ public class CollectionSourceTest {
                 .ofOptional()
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(ListCollector.create(), 2)
+                .collect(Collector.listCollector(), 2)
                 .subscribe(t -> assertEquals(2, t.size()))
                 .subscribe(l -> called.incrementAndGet());
 

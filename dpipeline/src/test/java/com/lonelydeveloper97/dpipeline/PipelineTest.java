@@ -2,7 +2,6 @@ package com.lonelydeveloper97.dpipeline;
 
 import com.lonelydeveloper97.dpipeline.collections.CollectionSource;
 import com.lonelydeveloper97.dpipeline.collections.Collector;
-import com.lonelydeveloper97.dpipeline.collections.ListCollector;
 
 import org.junit.Test;
 
@@ -75,14 +74,14 @@ public class PipelineTest {
 
                 //2nd pipeline
                 .subscribe(Pipeline.<String>createVar()
-                        .collect(ListCollector.create(), 4)
+                        .collect(Collector.listCollector(), 4)
                         .subscribe(l -> assertEquals("a", l.get(l.size() - 1)))
                         .subscribe(l -> called.incrementAndGet())
                 )
 
                 //3rd pipeline
                 .subscribe(Pipeline.<String>createVar()
-                        .collect(ListCollector.create(), 2)
+                        .collect(Collector.listCollector(), 2)
                         .immute(ArrayList::new)
 
                         //4th pipeline that is child of 3rd

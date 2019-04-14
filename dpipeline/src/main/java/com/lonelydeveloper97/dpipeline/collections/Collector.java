@@ -3,6 +3,9 @@ package com.lonelydeveloper97.dpipeline.collections;
 import com.lonelydeveloper97.dpipeline.Sink;
 import com.lonelydeveloper97.dpipeline.util.function.Function;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public interface Collector<T, R> extends Sink<T> {
     R collectCurrent();
 
@@ -43,7 +46,29 @@ public interface Collector<T, R> extends Sink<T> {
         return stringCollector(Object::toString);
     }
 
-    static <A> ListCollector<A> listCollector() {
-        return ListCollector.create();
+    static <T> Collector<T, List<T>> listCollector() {
+        return new Collector<T, List<T>>() {
+            List<T> accumulated = new ArrayList<>();
+
+            @Override
+            public List<T> collectCurrent() {
+                return new ArrayList<>(accumulated);
+            }
+
+            @Override
+            public void reset() {
+                accumulated.clear();
+            }
+
+            @Override
+            public int size() {
+                return accumulated.size();
+            }
+
+            @Override
+            public void accept(T o) {
+                accumulated.add(o);
+            }
+        };
     }
 }

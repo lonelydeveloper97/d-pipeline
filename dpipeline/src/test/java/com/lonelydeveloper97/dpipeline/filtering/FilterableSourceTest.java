@@ -1,20 +1,21 @@
 package com.lonelydeveloper97.dpipeline.filtering;
 
 import com.lonelydeveloper97.dpipeline.collections.CollectionSource;
-import com.lonelydeveloper97.dpipeline.collections.ListCollector;
+import com.lonelydeveloper97.dpipeline.collections.Collector;
 
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class FilterableSourceTest {
 
     @Test
     public void filter() {
-        ListCollector<String> collector = ListCollector.create();
+        Collector<String, List<String>> collector = Collector.listCollector();
 
         CollectionSource.fromIterable(Arrays.asList("1", "2", "3"))
                 .filter(s -> s.equals("3"))
@@ -25,7 +26,7 @@ public class FilterableSourceTest {
 
     @Test
     public void filterWithDefault() {
-        ListCollector<String> collector = ListCollector.create();
+        Collector<String, List<String>> collector = Collector.listCollector();
 
         CollectionSource.fromIterable(Arrays.asList("1", "2", "3"))
                 .filter(s -> s.equals("3"), () -> "4")
@@ -48,7 +49,7 @@ public class FilterableSourceTest {
 
     @Test
     public void filterNot() {
-        ListCollector<String> collector = ListCollector.create();
+        Collector<String, List<String>> collector = Collector.listCollector();
 
         CollectionSource.fromIterable(Arrays.asList("1", "2", "3"))
                 .filterNot(s -> s.equals("3"))
@@ -59,7 +60,7 @@ public class FilterableSourceTest {
 
     @Test
     public void filterNotWithDefault() {
-        ListCollector<String> collector = ListCollector.create();
+        Collector<String, List<String>> collector = Collector.listCollector();
 
         CollectionSource.fromIterable(Arrays.asList("1", "2", "3"))
                 .filterNot(s -> s.equals("3"), () -> "4")
@@ -71,7 +72,7 @@ public class FilterableSourceTest {
     @Test
     public void filterNotWithDo() {
         AtomicInteger doCalled = new AtomicInteger(0);
-        ListCollector<String> sink = ListCollector.create();
+        Collector<String, List<String>> sink = Collector.listCollector();
 
         CollectionSource.fromIterable(Arrays.asList("1", "2", "3"))
                 .filterNot(s -> s.equals("3"), () -> doCalled.set(doCalled.get() + 1))

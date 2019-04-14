@@ -2,7 +2,7 @@ package com.lonelydeveloper97.dpipeline.zip;
 
 import com.lonelydeveloper97.dpipeline.Source;
 import com.lonelydeveloper97.dpipeline.collections.CollectionSource;
-import com.lonelydeveloper97.dpipeline.collections.ListCollector;
+import com.lonelydeveloper97.dpipeline.collections.Collector;
 import com.lonelydeveloper97.dpipeline.pipe.stream.StreamPipe;
 
 import org.junit.Test;
@@ -56,7 +56,7 @@ public class ZippableSourceTest {
         Source<String> stringSource = CollectionSource.fromIterable(Arrays.asList("A", "B", "C", "D"));
         stringSource
                 .zipEmptyAllowed(CollectionSource.fromIterable(Arrays.asList(1, 2)))
-                .collect(ListCollector.create(), 4)
+                .collect(Collector.listCollector(), 4)
                 .subscribe(l -> assertEquals("A", l.get(0).getFirst().get()))
                 .subscribe(l -> assertEquals(1, (int) l.get(0).getSecond().get()))
                 .subscribe(l -> assertEquals("D", l.get(3).getFirst().get()))
@@ -77,7 +77,7 @@ public class ZippableSourceTest {
         StreamPipe<String> streamPipeForStrings = StreamPipe.create();
 
         streamPipeForStrings.zip(CollectionSource.fromIterable(Arrays.asList(1, 2, 3)))
-                .collect(ListCollector.create(), p -> p.getFirst().orElse("").equals("C"))
+                .collect(Collector.listCollector(), p -> p.getFirst().orElse("").equals("C"))
                 .subscribe(l -> assertEquals("A", l.get(0).getFirst().get()))
                 .subscribe(l -> assertEquals(1, (int) l.get(0).getSecond().get()))
                 .subscribe(l -> assertEquals("C", l.get(2).getFirst().get()))
