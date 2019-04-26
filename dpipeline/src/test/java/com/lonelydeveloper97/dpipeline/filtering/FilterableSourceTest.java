@@ -42,7 +42,7 @@ public class FilterableSourceTest {
         AtomicInteger doCalled = new AtomicInteger(0);
 
         CollectionSource.fromIterable(Arrays.asList("1", "2", "3"))
-                .filter(s -> s.equals("3"), () -> doCalled.set(doCalled.get() + 1));
+                .filter(s -> s.equals("3"), (t) -> doCalled.set(doCalled.get() + 1));
 
         assertEquals(2, doCalled.get());
     }
@@ -75,7 +75,7 @@ public class FilterableSourceTest {
         Collector<String, List<String>> sink = Collector.listCollector();
 
         CollectionSource.fromIterable(Arrays.asList("1", "2", "3"))
-                .filterNot(s -> s.equals("3"), () -> doCalled.set(doCalled.get() + 1))
+                .filterNot(s -> s.equals("3"), (t) -> doCalled.set(doCalled.get() + 1))
                 .subscribe(sink);
 
         assertEquals(1, doCalled.get());

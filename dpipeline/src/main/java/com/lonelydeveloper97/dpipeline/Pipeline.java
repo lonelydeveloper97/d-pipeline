@@ -58,8 +58,8 @@ public interface Pipeline<T, V> extends Sink<T>, Source<V> {
     }
 
     @Override
-    default <R> Pipeline<T, R> mapAsync(Function<V, Source<R>> map) {
-        return new PipelineImpl<>(head(), tail().mapAsync(map));
+    default <R> Pipeline<T, R> asyncMap(Function<V, Source<R>> map) {
+        return new PipelineImpl<>(head(), tail().asyncMap(map));
     }
 
     @Override
@@ -93,7 +93,7 @@ public interface Pipeline<T, V> extends Sink<T>, Source<V> {
     }
 
     @Override
-    default Pipeline<T, V> filter(Predicate<V> predicate, Runnable orDo) {
+    default Pipeline<T, V> filter(Predicate<V> predicate, Sink<V> orDo) {
         return create(head(), tail().filter(predicate, orDo));
     }
 
@@ -103,7 +103,7 @@ public interface Pipeline<T, V> extends Sink<T>, Source<V> {
     }
 
     @Override
-    default Pipeline<T, V> filterNot(Predicate<V> predicate, Runnable orDo) {
+    default Pipeline<T, V> filterNot(Predicate<V> predicate, Sink<V> orDo) {
         return create(head(), tail().filterNot(predicate, orDo));
     }
 

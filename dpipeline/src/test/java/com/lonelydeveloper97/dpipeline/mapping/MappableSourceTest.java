@@ -33,7 +33,7 @@ public class MappableSourceTest {
         AtomicInteger calledInt = new AtomicInteger();
 
         CollectionSource.fromIterable(Arrays.asList("1","2","3"))
-                .mapAsync(s -> {
+                .asyncMap(s -> {
                     StreamPipe<Integer> i = StreamPipe.create();
                     new Thread(() -> {
                         try {

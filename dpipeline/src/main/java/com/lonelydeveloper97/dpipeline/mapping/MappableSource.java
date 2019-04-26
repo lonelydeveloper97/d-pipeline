@@ -9,7 +9,7 @@ public interface MappableSource<T> extends SimpleSorce<T> {
         return createPipe((a, pipe) -> pipe.accept(map.apply(a)));
     }
 
-    default <R> Source<R> mapAsync(Function<T, Source<R>> map) {
+    default <R> Source<R> asyncMap(Function<T, Source<R>> map) {
         return createPipe((a, pipe) -> map.apply(a).subscribe(pipe));
     }
 
